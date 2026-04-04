@@ -150,8 +150,126 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
-        
 
+        public IActionResult ExternalLogin(ExternalLoginModel model)
+        {
+            if (!string.IsNullOrEmpty(model.ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, model.ErrorMessage);
+            }
+
+            return LocalRedirect(model.ReturnUrl);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginAsync(string provider, ExternalLoginModel model)
+        {
+            model.ReturnUrl ??= Url.Content("~/");
+            // Request a redirect to the external login provider.
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", values: new { model.ReturnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
+        }
+
+        public async Task<IActionResult> ExternalLoginCallbackAsync(ExternalLoginModel model, string returnUrl = null, string remoteError = null)
+        {
+            //var model = new ExternalLoginModel();
+            //if we create a new instance as above we will lose the returnUrl..so we have to catch the model in parameter..
+
+            model.ReturnUrl ??= Url.Content("~/");
+            if (remoteError != null)
+            {
+                model.ErrorMessage = $"Error from external provider: {remoteError}";
+                return RedirectToAction("Login", "Account", new { ReturnUrl = model.ReturnUrl });
+            }
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                model.ErrorMessage = "Error loading external login information.";
+                return RedirectToAction("Login", "Account", new { ReturnUrl = model.ReturnUrl });
+            }
+
+            // Sign in the user with this external login provider if the user already has a login.
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                return LocalRedirect(model.ReturnUrl);
+            }
+            if (result.IsLockedOut)
+            {
+                return RedirectToPage("./Lockout");
+            }
+            else
+            {
+                // If the user does not have an account, then ask the user to create an account.
+                model.ReturnUrl = returnUrl;
+                model.ProviderDisplayName = info.ProviderDisplayName;
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                {
+                    model.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                }
+                return View("ExternalLogin", model);
+            }
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginConfirmationAsync(ExternalLoginModel model)
+        {
+            model.ReturnUrl ??= Url.Content("~/");
+            // Get the information about the user from the external login provider
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                model.ErrorMessage = "Error loading external login information during confirmation.";
+                return RedirectToAction("Login", "Account", new { ReturnUrl = model.ReturnUrl });
+            }
+
+            if (ModelState.IsValid)
+            {
+                var user = CreateUser();
+
+                await _userStore.SetUserNameAsync(user, model.Email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
+
+                var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    result = await _userManager.AddLoginAsync(user, info);
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+                        var userId = await _userManager.GetUserIdAsync(user);
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Action(
+                            "ConfirmEmail",
+                            "Account",
+                            values: new { area = "Identity", userId = userId, code = code },
+                            protocol: Request.Scheme);
+
+                        //await _emailUtility.SendEmailAsync(model.Email, model.Email, "Confirm your email",
+                        //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                        // If account confirmation is required, we need to show the link if we don't have a real email sender
+                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                        {
+                            return RedirectToAction("Verify", new { Email = model.Email, returnUrl = model.ReturnUrl });
+                        }
+
+                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        return LocalRedirect(model.ReturnUrl);
+                    }
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            model.ProviderDisplayName = info.ProviderDisplayName;
+            return View("ExternalLogin", model);
+        }
         public async Task<IActionResult> LogoutAsync(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
