@@ -1,0 +1,62 @@
+﻿@inject SignInManager<BlogSiteUser> SignInManager
+@model AddPhoneNumberModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h3>@ViewData["Title"]</h3>
+@* <partial name="_StatusMessage" for="StatusMessage" /> *@
+
+ <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white py-3 text-center">
+                        <h5 class="mb-0">Account Settings</h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <!-- Name & Email Display -->
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Full Name</label>
+                            <p class="fs-5 border-bottom pb-1">John Doe</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold text-uppercase" asp-for="@Model.Username">Email Address</label>
+                            <p class="fs-5 border-bottom pb-1">@Model.Username</p>
+                        </div>
+
+                        <!-- Phone Number Section with Button -->
+                        <div class="mb-4">
+                            <label class="text-muted small fw-bold text-uppercase d-block">Phone Number</label>
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small italic">Not provided</span>
+                                <button class="btn btn-sm btn-outline-primary">Add Phone Number</button>
+                            </div>
+                        </div>
+
+                        <!-- 2FA Section with Enable/Disable Buttons -->
+                        <div class="bg-light p-3 rounded border text-center">
+                            <label class="fw-bold mb-3 d-block">Two-Factor Authentication (2FA)</label>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-danger flex-grow-1">Disable</button>
+                                <button class="btn btn-success flex-grow-1">Enable</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
