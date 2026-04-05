@@ -1,5 +1,4 @@
-﻿@page
-@model LoginWith2faModel
+﻿@model LoginWith2faModel
 @{
     ViewData["Title"] = "Two-factor authentication";
 }
@@ -13,14 +12,14 @@
             <input asp-for="RememberMe" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.TwoFactorCode" class="form-control" autocomplete="off" />
-                <label asp-for="Input.TwoFactorCode" class="form-label"></label>
-                <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+                <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" />
+                <label asp-for="TwoFactorCode" class="form-label"></label>
+                <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
             </div>
             <div class="checkbox mb-3">
-                <label asp-for="Input.RememberMachine" class="form-label">
-                    <input asp-for="Input.RememberMachine" />
-                    @Html.DisplayNameFor(m => m.Input.RememberMachine)
+                <label asp-for="RememberMachine" class="form-label">
+                    <input asp-for="RememberMachine" />
+                    @Html.DisplayNameFor(m => m.RememberMachine)
                 </label>
             </div>
             <div>

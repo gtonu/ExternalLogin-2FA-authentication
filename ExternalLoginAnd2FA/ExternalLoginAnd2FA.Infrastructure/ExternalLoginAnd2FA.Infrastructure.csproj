@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExternalLoginAnd2FA.Application\ExternalLoginAnd2FA.Application.csproj" />
-    <ProjectReference Include="..\ExternalLoginAnd2FA.Domain\ExternalLoginAnd2FA.Domain.csproj" />
   </ItemGroup>
 
 </Project>

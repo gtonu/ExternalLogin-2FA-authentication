@@ -12,6 +12,7 @@ namespace ExternalLoginAnd2FA.Infrastructure.Identity
         public string? CountryDialCode { get; set; }
         public override bool PhoneNumberConfirmed { get => base.PhoneNumberConfirmed; set => base.PhoneNumberConfirmed = value; }
         public DateTime RegistrationDate { get; set; }
+        public override bool TwoFactorEnabled { get => base.TwoFactorEnabled; set => base.TwoFactorEnabled = value; }
 
     }
 }

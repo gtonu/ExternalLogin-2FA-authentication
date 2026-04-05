@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Web", "ExternalLoginAnd2FA.Web\ExternalLoginAnd2FA.Web.csproj", "{7E9546A2-923C-445D-A8AC-14DAB56D25C9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Domain", "ExternalLoginAnd2FA.Domain\ExternalLoginAnd2FA.Domain.csproj", "{458987FC-EF85-4DF0-84D7-88A9F543DCAC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Infrastructure", "ExternalLoginAnd2FA.Infrastructure\ExternalLoginAnd2FA.Infrastructure.csproj", "{F98BA37D-F35D-4871-A1D5-81A95A6508AF}"
 EndProject
@@ -21,10 +19,6 @@ Global
 		{7E9546A2-923C-445D-A8AC-14DAB56D25C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E9546A2-923C-445D-A8AC-14DAB56D25C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E9546A2-923C-445D-A8AC-14DAB56D25C9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{458987FC-EF85-4DF0-84D7-88A9F543DCAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{458987FC-EF85-4DF0-84D7-88A9F543DCAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{458987FC-EF85-4DF0-84D7-88A9F543DCAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{458987FC-EF85-4DF0-84D7-88A9F543DCAC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F98BA37D-F35D-4871-A1D5-81A95A6508AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F98BA37D-F35D-4871-A1D5-81A95A6508AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F98BA37D-F35D-4871-A1D5-81A95A6508AF}.Release|Any CPU.ActiveCfg = Release|Any CPU

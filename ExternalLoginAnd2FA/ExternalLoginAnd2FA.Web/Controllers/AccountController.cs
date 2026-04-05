@@ -35,61 +35,9 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             _logger = logger;
             //_emailSender = emailSender;
         }
-        public async Task<IActionResult> LoginAsync(string returnUrl = null)
-        {
-            var model = new LoginModel();
-            if (!string.IsNullOrEmpty(model.ErrorMessage))
-            {
-                ModelState.AddModelError(string.Empty, model.ErrorMessage);
-            }
+        
 
-            returnUrl ??= Url.Content("~/");
-
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            model.ReturnUrl = returnUrl;
-            return View(model);
-        }
-
-        [HttpPost,ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginAsync(LoginModel model)
-        {
-            model.ReturnUrl ??= Url.Content("~/");
-
-            model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            if (ModelState.IsValid)
-            {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(model.ReturnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
-            }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
-        }
+        
         public async Task<IActionResult> RegisterAsync(string returnUrl = null)
         {
             var model = new RegisterModel();
@@ -112,6 +60,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 await _userStore.SetUserNameAsync(user, model.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, model.Password);
+                await _userManager.SetTwoFactorEnabledAsync(user, true);
 
                 if (result.Succeeded)
                 {
@@ -149,6 +98,118 @@ namespace ExternalLoginAnd2FA.Web.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        public async Task<IActionResult> LoginAsync(string returnUrl = null)
+        {
+            var model = new LoginModel();
+            if (!string.IsNullOrEmpty(model.ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, model.ErrorMessage);
+            }
+
+            returnUrl ??= Url.Content("~/");
+
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            model.ReturnUrl = returnUrl;
+            return View(model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginAsync(LoginModel model)
+        {
+            model.ReturnUrl ??= Url.Content("~/");
+
+            model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (ModelState.IsValid)
+            {
+                // This doesn't count login failures towards account lockout
+                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User logged in.");
+                    return LocalRedirect(model.ReturnUrl);
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
+                }
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return View(model);
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        public async Task<IActionResult> LoginWith2faAsync(bool rememberMe, string returnUrl = null)
+        {
+            // Ensure the user has gone through the username & password screen first
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            if (user == null)
+            {
+                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            }
+            var model = new LoginWith2faModel();
+            model.ReturnUrl = returnUrl;
+            model.RememberMe = rememberMe;
+
+            return View(model);
+        }
+
+        [HttpPost,ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginWith2faAsync(LoginWith2faModel model,bool rememberMe, string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.ReturnUrl = returnUrl ?? Url.Content("~/");
+
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            }
+
+            var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
+
+            var userId = await _userManager.GetUserIdAsync(user);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+                return LocalRedirect(model.ReturnUrl);
+            }
+            else if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
+                return RedirectToPage("./Lockout");
+            }
+            else
+            {
+                _logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
+                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+                return View(model);
+            }
         }
 
         public IActionResult ExternalLogin(ExternalLoginModel model)

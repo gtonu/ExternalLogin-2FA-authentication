@@ -1,3 +1,4 @@
+using ExternalLoginAnd2FA.Domain.Email;
 using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -49,6 +50,9 @@ try
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
     builder.Services.AddModifiedIdentity();
+    #region Mapping Mailtrap configuration with SmtpSettings class from appsettings.json
+    builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+    #endregion
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
 
@@ -91,6 +95,5 @@ finally
 {
     Log.CloseAndFlush();
 }
-
 
 
