@@ -1,16 +1,12 @@
-﻿using DevSkill.Blog.Domain.Email;
-using DevSkill.Blog.Domain.Utilities;
+﻿using ExternalLoginAnd2FA.Domain.Email;
+using ExternalLoginAnd2FA.Domain.Utilities;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DevSkill.Blog.Infrastructure.Utilities
+
+namespace ExternalLoginAnd2FA.Infrastructure.Utilities
 {
     public class EmailUtility : IEmailUtility
     {

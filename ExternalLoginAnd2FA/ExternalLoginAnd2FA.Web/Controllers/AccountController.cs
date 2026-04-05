@@ -1,4 +1,5 @@
-﻿using ExternalLoginAnd2FA.Infrastructure.Identity;
+﻿using ExternalLoginAnd2FA.Domain.Utilities;
+using ExternalLoginAnd2FA.Infrastructure.Identity;
 using ExternalLoginAnd2FA.Web.Areas.Identity.Pages.Account;
 using ExternalLoginAnd2FA.Web.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -20,20 +21,21 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         private readonly IUserStore<BlogSiteUser> _userStore;
         private readonly IUserEmailStore<BlogSiteUser> _emailStore;
         private readonly ILogger<AccountController> _logger;
-        //private readonly IEmailSender _emailSender;
+        private readonly IEmailUtility _emailUtility;
 
         public AccountController(
             UserManager<BlogSiteUser> userManager,
             IUserStore<BlogSiteUser> userStore,
             SignInManager<BlogSiteUser> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IEmailUtility emailUtility)
         {
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            //_emailSender = emailSender;
+            _emailUtility = emailUtility;
         }
         
 
@@ -61,6 +63,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, model.Password);
                 await _userManager.SetTwoFactorEnabledAsync(user, true);
+                user.EmailConfirmed = true;
+                await _userManager.UpdateAsync(user);
 
                 if (result.Succeeded)
                 {
@@ -75,8 +79,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = model.ReturnUrl },
                         protocol: Request.Scheme);
 
-                    //await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailUtility.SendEmailAsync(model.Email, model.Email,"Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(model.ReturnUrl);
@@ -138,7 +142,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 }
                 if (result.RequiresTwoFactor)
                 {
-                    return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
+                    return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe,Email = model.Email });
                 }
                 if (result.IsLockedOut)
                 {
@@ -156,7 +160,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> LoginWith2faAsync(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2faAsync(bool rememberMe, string returnUrl = null,string email = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -169,6 +173,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             model.ReturnUrl = returnUrl;
             model.RememberMe = rememberMe;
 
+            var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+            await _emailUtility.SendEmailAsync(email, email, "otp", $"Your 2fa otp is {token}");
             return View(model);
         }
 
@@ -181,6 +187,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             }
 
             model.ReturnUrl = returnUrl ?? Url.Content("~/");
+            model.RememberMe = rememberMe;
 
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
@@ -188,10 +195,15 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
-            var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            //these codes are for TOTP or for authenticator app..
+            //var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
+            //var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
 
+
+            //these codes are for sending otp via Mail/SMS providers..
+            var otp = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            var result = await _signInManager.TwoFactorSignInAsync("Email", otp, model.RememberMe, model.RememberMachine);
             var userId = await _userManager.GetUserIdAsync(user);
 
             if (result.Succeeded)

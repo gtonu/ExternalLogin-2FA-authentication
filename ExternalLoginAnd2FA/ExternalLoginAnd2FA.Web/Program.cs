@@ -1,6 +1,8 @@
 using ExternalLoginAnd2FA.Domain.Email;
+using ExternalLoginAnd2FA.Domain.Utilities;
 using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Infrastructure.Extensions;
+using ExternalLoginAnd2FA.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -35,6 +37,7 @@ try
         );
     #endregion
     builder.Services.AddApplicationDbContext(connectionString, migrationAssembly);
+    builder.Services.AddSingleton<IEmailUtility, EmailUtility>();
     #region google login
     builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     {
@@ -95,5 +98,4 @@ finally
 {
     Log.CloseAndFlush();
 }
-
 
