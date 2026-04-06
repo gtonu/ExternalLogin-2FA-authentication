@@ -1,4 +1,5 @@
 ﻿@inject SignInManager<BlogSiteUser> SignInManager
+@inject UserManager<BlogSiteUser> UserManager
 @model AddPhoneNumberModel
 @{
     ViewData["Title"] = "Profile";
@@ -19,12 +20,12 @@
                         <!-- Name & Email Display -->
                         <div class="mb-3">
                             <label class="text-muted small fw-bold text-uppercase">Full Name</label>
-                            <p class="fs-5 border-bottom pb-1">John Doe</p>
+                            <p class="fs-5 border-bottom pb-1">@User.Identity?.Name</p>
                         </div>
 
                         <div class="mb-3">
                             <label class="text-muted small fw-bold text-uppercase" asp-for="@Model.Username">Email Address</label>
-                            <p class="fs-5 border-bottom pb-1">@Model.Username</p>
+                            <p class="fs-5 border-bottom pb-1">@User.Identity?.Name</p>
                         </div>
 
                         <!-- Phone Number Section with Button -->
@@ -40,8 +41,21 @@
                         <div class="bg-light p-3 rounded border text-center">
                             <label class="fw-bold mb-3 d-block">Two-Factor Authentication (2FA)</label>
                             <div class="d-flex justify-content-center gap-2">
-                                <button class="btn btn-danger flex-grow-1">Disable</button>
-                                <button class="btn btn-success flex-grow-1">Enable</button>
+                            @{
+                                var user = await UserManager.GetUserAsync(User);
+                                var _2fa =await UserManager.GetTwoFactorEnabledAsync(user);
+                                if(_2fa)
+                                {
+                                    <button class="btn btn-danger flex-grow-1">Disable</button>
+                                    <button class="btn btn-success flex-grow-1" disabled>Enable</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-danger flex-grow-1" disabled>Disable</button>
+                                    <button class="btn btn-success flex-grow-1">Enable</button>
+                                }
+                            }
+                                
                             </div>
                         </div>
 

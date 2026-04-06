@@ -4,10 +4,8 @@ using ExternalLoginAnd2FA.Web.Areas.Identity.Pages.Account;
 using ExternalLoginAnd2FA.Web.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -263,11 +261,18 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             }
 
             // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: false);
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(model.ReturnUrl);
+            }
+            if(result.RequiresTwoFactor)
+            {
+                //finds out the current user with twofactorauthentication enabled..
+                var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+                return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, Email = user.Email });
             }
             if (result.IsLockedOut)
             {
@@ -311,6 +316,9 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                     if (result.Succeeded)
                     {
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        await _userManager.SetTwoFactorEnabledAsync(user, true);
+                        user.EmailConfirmed = true;
+                        await _userManager.UpdateAsync(user);
 
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
