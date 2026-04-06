@@ -53,13 +53,16 @@ try
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
     builder.Services.AddModifiedIdentity();
-    builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-    options.TokenLifespan = TimeSpan.FromMinutes(1));
+    
     #region Mapping Mailtrap configuration with SmtpSettings class from appsettings.json
     builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
     #endregion
+    #region Mapping Ipstack API key with Ipstack class from secrets.json
+    builder.Services.Configure<IpStack>(builder.Configuration.GetSection("Ipstack"));
+    #endregion
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
+    builder.Services.AddHttpClient();
 
     var app = builder.Build();
 

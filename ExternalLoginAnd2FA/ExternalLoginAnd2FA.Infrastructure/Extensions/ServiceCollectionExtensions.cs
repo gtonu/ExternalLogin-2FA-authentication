@@ -1,5 +1,6 @@
 ﻿using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Infrastructure.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,13 @@ namespace ExternalLoginAnd2FA.Infrastructure.Extensions
                 //SignIn settings.
                 options.SignIn.RequireConfirmedAccount = false;
             });
+
+            services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorRememberMeScheme,options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromSeconds(30);
+            });
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromMinutes(1));
         }
     }
 }

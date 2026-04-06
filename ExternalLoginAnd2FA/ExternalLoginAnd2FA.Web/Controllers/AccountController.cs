@@ -1,14 +1,18 @@
-﻿using ExternalLoginAnd2FA.Domain.Utilities;
+﻿using Azure.Identity;
+using ExternalLoginAnd2FA.Domain.Utilities;
 using ExternalLoginAnd2FA.Infrastructure.Identity;
+using ExternalLoginAnd2FA.Infrastructure.Utilities;
 using ExternalLoginAnd2FA.Web.Areas.Identity.Pages.Account;
 using ExternalLoginAnd2FA.Web.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using UAParser;
 
 namespace ExternalLoginAnd2FA.Web.Controllers
 {
@@ -20,13 +24,17 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         private readonly IUserEmailStore<BlogSiteUser> _emailStore;
         private readonly ILogger<AccountController> _logger;
         private readonly IEmailUtility _emailUtility;
+        private readonly IpStack _ipStack;
+        private readonly IHttpClientFactory _clientFactory;
 
         public AccountController(
             UserManager<BlogSiteUser> userManager,
             IUserStore<BlogSiteUser> userStore,
             SignInManager<BlogSiteUser> signInManager,
             ILogger<AccountController> logger,
-            IEmailUtility emailUtility)
+            IEmailUtility emailUtility,
+            IOptions<IpStack> ipStack,
+            IHttpClientFactory clientFactory)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -34,6 +42,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             _signInManager = signInManager;
             _logger = logger;
             _emailUtility = emailUtility;
+            _ipStack = ipStack.Value;
+            _clientFactory = clientFactory;
         }
         
 
@@ -133,6 +143,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
@@ -140,6 +151,13 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 }
                 if (result.RequiresTwoFactor)
                 {
+                    var ip = GetIpAddress();
+                    var userAgent = Request.Headers["User-Agent"].ToString();
+                    var deviceInfo = GetDeviceInfo(userAgent);
+                    var informations =await GetDeviceLocationInfoAsync();
+                    //var ipStackApiKey = _ipStack.APIKey;
+                    _logger.LogInformation($"{deviceInfo.DeviceName} at {DateTime.UtcNow}");
+
                     return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe,Email = model.Email });
                 }
                 if (result.IsLockedOut)
@@ -389,5 +407,47 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             }
             return (IUserEmailStore<BlogSiteUser>)_userStore;
         }
+        
+        private string GetIpAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                return Request.Headers["X-Forwarded-For"];
+
+            return HttpContext.Connection.RemoteIpAddress?.ToString();
+        }
+
+        private DeviceInfo GetDeviceInfo(string userAgent)
+        {
+            var uaParser = Parser.GetDefault();
+            var userInfo = uaParser.Parse(userAgent);
+
+            return new DeviceInfo
+            {
+                Browser = userInfo.UA.Family,
+                OS = userInfo.OS.Family,
+                DeviceName = $"{userInfo.UA.Family} on {userInfo.OS.Family}"
+            };
+        }
+
+        private async Task<string> GetDeviceLocationInfoAsync()
+        {
+            var client = _clientFactory.CreateClient();
+            var response =await client.GetAsync($"http://api.ipstack.com/check?access_key={_ipStack.APIKey}");
+            var informations = await response.Content.ReadAsStringAsync();
+            return informations;
+        }
+    }
+
+    public class DeviceInfo
+    {
+        public string DeviceName { get; set; }
+        public string Browser { get; set; }
+        public string OS { get; set; }
+    }
+    
+    public class LocationInfo
+    {
+        public string CityName { get; set; }
+        public string CountryName { get; set; }
     }
 }
