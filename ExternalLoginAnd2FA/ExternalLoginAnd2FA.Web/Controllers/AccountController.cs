@@ -25,6 +25,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IEmailUtility _emailUtility;
         private readonly IpStack _ipStack;
+        private readonly Userstack _userStack;
         private readonly IHttpClientFactory _clientFactory;
 
         public AccountController(
@@ -34,7 +35,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             ILogger<AccountController> logger,
             IEmailUtility emailUtility,
             IOptions<IpStack> ipStack,
-            IHttpClientFactory clientFactory)
+            IHttpClientFactory clientFactory,
+            IOptions<Userstack> userStack)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +45,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             _logger = logger;
             _emailUtility = emailUtility;
             _ipStack = ipStack.Value;
+            _userStack = userStack.Value;
             _clientFactory = clientFactory;
         }
         
@@ -154,6 +157,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                     var ip = GetIpAddress();
                     var userAgent = Request.Headers["User-Agent"].ToString();
                     var deviceInfo = GetDeviceInfo(userAgent);
+                    var deviceInformation = GetDeviceInfoWithAPICall(userAgent);
                     var informations =await GetDeviceLocationInfoAsync();
                     //var ipStackApiKey = _ipStack.APIKey;
                     _logger.LogInformation($"{deviceInfo.DeviceName} at {DateTime.UtcNow}");
@@ -429,11 +433,21 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             };
         }
 
+        private async Task<string> GetDeviceInfoWithAPICall(string ua)
+        {
+            var client = _clientFactory.CreateClient();
+            var response = await client.GetAsync($"http://api.userstack.com/detect?ua={ua}&access_key={_userStack.APIkey}");
+            var deviceInformations = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation($"{deviceInformations}");
+            return deviceInformations;
+        }
+
         private async Task<string> GetDeviceLocationInfoAsync()
         {
             var client = _clientFactory.CreateClient();
             var response =await client.GetAsync($"http://api.ipstack.com/check?access_key={_ipStack.APIKey}");
             var informations = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation($"{informations}");
             return informations;
         }
     }

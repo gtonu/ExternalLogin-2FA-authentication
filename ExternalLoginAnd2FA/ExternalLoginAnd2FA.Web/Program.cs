@@ -60,6 +60,9 @@ try
     #region Mapping Ipstack API key with Ipstack class from secrets.json
     builder.Services.Configure<IpStack>(builder.Configuration.GetSection("Ipstack"));
     #endregion
+    #region Mapping Userstack API key with Userstack class from secrets.json
+    builder.Services.Configure<Userstack>(builder.Configuration.GetSection("Userstack"));
+    #endregion
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
     builder.Services.AddHttpClient();
