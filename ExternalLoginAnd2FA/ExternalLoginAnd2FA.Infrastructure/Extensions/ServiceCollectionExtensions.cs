@@ -15,7 +15,7 @@ namespace ExternalLoginAnd2FA.Infrastructure.Extensions
             string connectionString, Assembly migrationAssembly)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString
+            options.UseNpgsql(connectionString
             , (x) => x.MigrationsAssembly(migrationAssembly)));
         }
         public static void AddModifiedIdentity(this IServiceCollection services)

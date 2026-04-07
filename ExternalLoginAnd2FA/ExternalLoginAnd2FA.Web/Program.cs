@@ -23,8 +23,10 @@ try
     var facebookAppSecret = builder.Configuration["Facebook:AppSecret"];
 
     // Add services to the container.
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+    //    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    var connectionString = builder.Configuration.GetConnectionString("PostGreSqlConnection") ??
+        throw new InvalidOperationException("Connection string 'PostGreSqlConnection' not found.");
     var migrationAssembly = Assembly.GetAssembly(typeof(ApplicationDbContext));
 
     //general logger configuration
