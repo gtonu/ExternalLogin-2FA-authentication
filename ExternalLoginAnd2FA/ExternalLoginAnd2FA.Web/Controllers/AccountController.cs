@@ -8,11 +8,15 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
+using NuGet.Protocol;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using UAParser;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ExternalLoginAnd2FA.Web.Controllers
 {
@@ -27,6 +31,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         private readonly IpStack _ipStack;
         private readonly Userstack _userStack;
         private readonly IHttpClientFactory _clientFactory;
+        private readonly IDistributedCache _distributedCache;
 
         public AccountController(
             UserManager<BlogSiteUser> userManager,
@@ -36,7 +41,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             IEmailUtility emailUtility,
             IOptions<IpStack> ipStack,
             IHttpClientFactory clientFactory,
-            IOptions<Userstack> userStack)
+            IOptions<Userstack> userStack,
+            IDistributedCache distributedCache)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -47,6 +53,7 @@ namespace ExternalLoginAnd2FA.Web.Controllers
             _ipStack = ipStack.Value;
             _userStack = userStack.Value;
             _clientFactory = clientFactory;
+            _distributedCache = distributedCache;
         }
         
 
@@ -73,8 +80,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                 await _userStore.SetUserNameAsync(user, model.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, model.Password);
-                await _userManager.SetTwoFactorEnabledAsync(user, true);
-                user.EmailConfirmed = true;
+                //await _userManager.SetTwoFactorEnabledAsync(user, true);
+                //user.EmailConfirmed = true;
                 await _userManager.UpdateAsync(user);
 
                 if (result.Succeeded)
@@ -90,8 +97,8 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = model.ReturnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailUtility.SendEmailAsync(model.Email, model.Email,"Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //await _emailUtility.SendEmailAsync(model.Email, model.Email,"Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(model.ReturnUrl);
@@ -161,6 +168,10 @@ namespace ExternalLoginAnd2FA.Web.Controllers
                     var informations =await GetDeviceLocationInfoAsync();
                     //var ipStackApiKey = _ipStack.APIKey;
                     _logger.LogInformation($"{deviceInfo.DeviceName} at {DateTime.UtcNow}");
+
+                    var user = _userManager.GetUserAsync(User);
+                    byte[] userIdInBytes = Encoding.UTF8.GetBytes(user.Id.ToString());
+                    HttpContext.Session.Set("UserId", userIdInBytes);
 
                     return RedirectToAction("LoginWith2fa", new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe,Email = model.Email });
                 }

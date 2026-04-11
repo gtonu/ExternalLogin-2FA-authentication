@@ -1,4 +1,5 @@
-﻿using ExternalLoginAnd2FA.Infrastructure.Data;
+﻿using Community.Microsoft.Extensions.Caching.PostgreSql;
+using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -59,5 +60,6 @@ namespace ExternalLoginAnd2FA.Infrastructure.Extensions
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromMinutes(1));
         }
+        
     }
 }
