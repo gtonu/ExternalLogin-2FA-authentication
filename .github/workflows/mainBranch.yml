@@ -22,12 +22,12 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version}}
       
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln
 
       - name: Clean previous builds
-        run: dotnet clean --configuration release
+        run: dotnet clean ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln --configuration release
 
       - name: Build project
-        run: dotnet build --configuration release --no-restore
+        run: dotnet build ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln --configuration release --no-restore
 
       
