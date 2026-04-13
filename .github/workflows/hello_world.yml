@@ -1,15 +1,17 @@
-name: Building my first CI
+name: Hello World script
 
 on:
   push:
     branches:
       - 'main'
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Print Hello World
-        run: echo Hello,World!
+      - name: Greet the World
+        run: echo Hello, World!
