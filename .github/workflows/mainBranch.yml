@@ -14,7 +14,7 @@ jobs:
 
     env:
       SOLUTION_PATH: ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln
-      TEST_RESULTS_DIR: TestResults
+      TEST_RESULTS_DIR: ExternalLoginAnd2FA/ExternalLoginAnd2FA.Web.Tests
 
     steps:
       - name: Checkout
