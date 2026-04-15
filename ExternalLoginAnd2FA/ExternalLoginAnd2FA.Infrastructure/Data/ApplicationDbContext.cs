@@ -22,5 +22,6 @@ namespace ExternalLoginAnd2FA.Infrastructure.Data
         }
 
         public DbSet<AspNetUserSession> AspNetUserSessions { get; set; }
+        public DbSet<Store> Stores { get; set; }
     }
 }

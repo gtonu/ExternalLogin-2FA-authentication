@@ -12,6 +12,10 @@ jobs:
       matrix:
         dotnet-version: ["10.0.x"]
 
+    env:
+      SOLUTION_PATH: ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln
+      TEST_RESULTS_DIR: TestResults
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,12 +26,29 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version}}
       
       - name: Restore dependencies
-        run: dotnet restore ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: Clean previous builds
-        run: dotnet clean ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln --configuration release
+        run: dotnet clean ${{ env.SOLUTION_PATH }} --configuration release
 
       - name: Build project
-        run: dotnet build ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln --configuration release --no-restore
+        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration release --no-restore
+
+      - name: Run unit tests
+        run: |
+          dotnet test "${{ env.SOLUTION_PATH }}" \
+            --configuration Release \
+            --logger "trx;LogFileName=TestResults-${{ github.ref_name }}.trx" \
+            --results-directory "${{ env.TEST_RESULTS_DIR }}"
+
+      - name: Upload unit test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}-tests-${{ github.run_number }}
+          path: ${{ env.TEST_RESULTS_DIR }}
+
+
+
 
       

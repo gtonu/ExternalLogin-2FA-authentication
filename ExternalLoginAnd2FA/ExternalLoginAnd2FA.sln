@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Web", "ExternalLoginAnd2FA.Web\ExternalLoginAnd2FA.Web.csproj", "{7E9546A2-923C-445D-A8AC-14DAB56D25C9}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Application", "ExternalLoginAnd2FA.Application\ExternalLoginAnd2FA.Application.csproj", "{66684E33-CC9A-4B5E-AFCA-7A1A1E95C91F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Domain", "ExternalLoginAnd2FA.Domain\ExternalLoginAnd2FA.Domain.csproj", "{06848C81-B4F2-767B-CAA1-514248A49B1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestResults", "TestResults", "{9895A7BE-0966-47C9-9119-2A837CC06451}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalLoginAnd2FA.Web.Tests", "ExternalLoginAnd2FA.Web.Tests\ExternalLoginAnd2FA.Web.Tests.csproj", "{504DD3E2-7207-42D8-A7CE-38CEEC396640}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +37,16 @@ Global
 		{06848C81-B4F2-767B-CAA1-514248A49B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06848C81-B4F2-767B-CAA1-514248A49B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06848C81-B4F2-767B-CAA1-514248A49B1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{504DD3E2-7207-42D8-A7CE-38CEEC396640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{504DD3E2-7207-42D8-A7CE-38CEEC396640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{504DD3E2-7207-42D8-A7CE-38CEEC396640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{504DD3E2-7207-42D8-A7CE-38CEEC396640}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{504DD3E2-7207-42D8-A7CE-38CEEC396640} = {9895A7BE-0966-47C9-9119-2A837CC06451}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {57C4CF8B-2980-4206-890B-AE7D440F92C4}
