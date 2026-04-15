@@ -1,0 +1,8 @@
+services:
+    web:
+      build:
+        context: .
+        dockerfile: "ExternalLoginAnd2FA.Web/Dockerfile"
+      image: "externalloginand2fa"
+      env_file: 
+        - 'ExternalLoginAnd2FA.Web/web.env'
