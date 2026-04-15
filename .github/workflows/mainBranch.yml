@@ -26,7 +26,7 @@ jobs:
       TEST_RESULTS_DIR: ExternalLoginAnd2FA/ExternalLoginAnd2FA.Web.Tests
       DOCKER_SERVICE: web
       DOCKER_IMAGE_NAME: externalloginand2fa
-      DOCKER_COMPOSE_FILE: ExternalLoginAnd2FA.Web/docker-compose.yml
+      DOCKER_COMPOSE_FILE: ExternalLoginAnd2FA/docker-compose.yml
 
     steps:
       - name: Checkout
