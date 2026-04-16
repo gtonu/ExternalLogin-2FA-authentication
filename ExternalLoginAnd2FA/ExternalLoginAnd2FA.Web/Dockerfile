@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 RUN apt update && apt install -y nodejs
 COPY ["ExternalLoginAnd2FA.Web/ExternalLoginAnd2FA.Web.csproj","ExternalLoginAnd2FA.Web/"]
@@ -15,7 +15,7 @@ RUN dotnet build "ExternalLoginAnd2FA.Web.csproj" -c Release -o /app
 FROM build AS publish
 RUN dotnet publish "ExternalLoginAnd2FA.Web.csproj" -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=publish /app .
 EXPOSE 80
