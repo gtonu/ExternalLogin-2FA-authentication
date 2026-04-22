@@ -24,6 +24,7 @@ jobs:
     env:
       SOLUTION_PATH: ExternalLoginAnd2FA/ExternalLoginAnd2FA.sln
       TEST_RESULTS_DIR: ExternalLoginAnd2FA/ExternalLoginAnd2FA.Web.Tests
+      CODE_COVERAGE_DIR: ExternalLoginAnd2FA/code-coverage
       DOCKER_SERVICE: web
       DOCKER_IMAGE_NAME: externalloginand2fa
       DOCKER_COMPOSE_FILE: ExternalLoginAnd2FA/docker-compose.yml
@@ -36,6 +37,12 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet-version}}
+
+      - name: Install global report generator tool
+        run: |
+          dotnet \
+          tool install \
+          --global dotnet-reportgenerator-globaltool
       
       - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -46,13 +53,21 @@ jobs:
       - name: Build project
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration release --no-restore
 
-      - name: Run unit tests
+      - name: Run unit tests with code coverage
         run: |
           dotnet test "${{ env.SOLUTION_PATH }}" \
             --configuration Release \
             --no-build --no-restore\
             --logger "trx;LogFileName=TestResults-${{ github.ref_name }}.trx" \
-            --results-directory "${{ env.TEST_RESULTS_DIR }}"
+            --results-directory "${{ env.TEST_RESULTS_DIR }}" \
+            /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{ env.CODE_COVERAGE_DIR }}/coverage.opencover.xml
+
+      - name: Run report generator
+        run: |
+          reportgenerator \
+          -reports:${{ env.CODE_COVERAGE_DIR }}/coverage.opencover.xml \
+          -targetdir:${{ env.CODE_COVERAGE_DIR }}/coverage-report \
+          -reporttypes:Html
 
       - name: Upload unit test results
         if: ${{ always() }}
@@ -60,6 +75,13 @@ jobs:
         with:
           name: ${{ github.ref_name }}-tests-${{ github.run_number }}
           path: ${{ env.TEST_RESULTS_DIR }}
+
+      - name: Upload code coverage report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}-code-coverage-report-${{ github.run_number }}
+          path: ${{ env.CODE_COVERAGE_DIR }}/coverage-report
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
