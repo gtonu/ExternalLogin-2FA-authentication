@@ -1,4 +1,3 @@
-using Community.Microsoft.Extensions.Caching.PostgreSql;
 using ExternalLoginAnd2FA.Domain.Email;
 using ExternalLoginAnd2FA.Domain.Utilities;
 using ExternalLoginAnd2FA.Infrastructure.Data;
@@ -7,10 +6,9 @@ using ExternalLoginAnd2FA.Infrastructure.Identity;
 using ExternalLoginAnd2FA.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Build.Experimental;
+using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System.Configuration;
 using System.Reflection;
 
 //Bootstrap logger configuration
@@ -101,7 +99,10 @@ try
     //    setup.ExpiredItemsDeletionInterval = TimeSpan.FromMinutes(5);
     //});
     //#endregion
-    builder.Services.AddControllersWithViews();
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+    builder.Services.AddControllersWithViews()
+           .AddViewLocalization()
+           .AddDataAnnotationsLocalization();
     builder.Services.AddRazorPages();
     builder.Services.AddHttpClient();
     builder.Services.AddSession(options =>
@@ -111,6 +112,13 @@ try
 
 
     var app = builder.Build();
+
+    var supportedCultures = new[] { "en-US", "bn-BD" };
+    var localizationOptions = new RequestLocalizationOptions()
+                                  .SetDefaultCulture("en-US")
+                                  .AddSupportedCultures(supportedCultures)
+                                  .AddSupportedUICultures(supportedCultures);
+    //localizationOptions.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -128,10 +136,16 @@ try
     app.UseRouting();
     app.UseSession();
 
+    app.UseRequestLocalization(localizationOptions);
     app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapStaticAssets();
+
+    //app.MapControllerRoute(
+    //    name: "localize",
+    //    pattern: "{culture=en-US}/{controller=Home}/{action=Index}/{id?}")
+    //    .WithStaticAssets();
 
     app.MapControllerRoute(
         name: "default",

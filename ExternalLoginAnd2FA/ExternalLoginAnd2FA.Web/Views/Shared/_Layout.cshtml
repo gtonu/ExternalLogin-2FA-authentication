@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Globalization
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -18,17 +19,68 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                @{
+                    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
+                }
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
                         </li>
                     </ul>
+                    <div class="nav-item dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            Language
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form asp-controller="Home" asp-action="SetLanguage" asp-route-returnUrl="@returnUrl" method="post">
+                                    <input type="hidden" name="culture" value="bn-BD" />
+                                    <button type="submit" class="dropdown-item">বাংলা (Bangla)</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form asp-controller="Home" asp-action="SetLanguage" asp-route-returnUrl="@returnUrl" method="post">
+                                    <input type="hidden" name="culture" value="en-US" />
+                                    <button type="submit" class="dropdown-item">English</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                    @* <div class="nav-item dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            Language
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="?culture=bn-BD">বাংলা (Bangla)</a>
+                            </li>
+                            <li>
+                                <a href="?culture=en-US">English</a>
+                            </li>
+                        </ul>
+                    </div> *@
+
+                    @* <div class="nav-item dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            Language
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-route-culture="bn-BD">বাংলা (Bangla)</a>
+                            </li>
+                            <li>
+                                <a asp-route-culture="en-US">English</a>
+                            </li>
+                        </ul>
+                    </div> *@
                     <partial name="_LoginPartial" />
                 </div>
+                
             </div>
         </nav>
     </header>

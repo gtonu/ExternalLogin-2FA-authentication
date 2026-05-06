@@ -1,9 +1,11 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using ExternalLoginAnd2FA.Domain.Entities;
 using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Web.Models;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace ExternalLoginAnd2FA.Web.Controllers
 {
@@ -36,6 +38,16 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+        public IActionResult SetLanguage(string culture, string returnUrl)
+        {
+            // Save the choice in the ASP.NET Core standard culture cookie
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+            return LocalRedirect(returnUrl);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

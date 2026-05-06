@@ -2,6 +2,8 @@
 @using ExternalLoginAnd2FA.Web.Models
 ﻿@using ExternalLoginAnd2FA.Infrastructure.Identity
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject SignInManager<BlogSiteUser> SignInManager
 @inject UserManager<BlogSiteUser> UserManager
+@inject IViewLocalizer Localizer;
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
