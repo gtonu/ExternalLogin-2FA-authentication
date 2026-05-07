@@ -3,6 +3,7 @@ using ExternalLoginAnd2FA.Domain.Utilities;
 using ExternalLoginAnd2FA.Infrastructure.Data;
 using ExternalLoginAnd2FA.Infrastructure.Extensions;
 using ExternalLoginAnd2FA.Infrastructure.Identity;
+using ExternalLoginAnd2FA.Infrastructure.Middleware;
 using ExternalLoginAnd2FA.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -118,7 +119,7 @@ try
                                   .SetDefaultCulture("en-US")
                                   .AddSupportedCultures(supportedCultures)
                                   .AddSupportedUICultures(supportedCultures);
-    //localizationOptions.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
+    localizationOptions.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -136,6 +137,8 @@ try
     app.UseRouting();
     app.UseSession();
 
+    app.UseMiddleware<LocalizationMiddleware>();
+
     app.UseRequestLocalization(localizationOptions);
     app.UseAuthentication();
     app.UseAuthorization();
@@ -149,7 +152,7 @@ try
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
+        pattern: "{culture=en-US}/{controller=Home}/{action=Index}/{id?}")
         .WithStaticAssets();
 
     app.MapRazorPages()
