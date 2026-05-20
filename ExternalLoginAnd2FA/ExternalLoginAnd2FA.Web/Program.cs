@@ -114,7 +114,7 @@ try
 
     var app = builder.Build();
 
-    var supportedCultures = new[] { "en-US", "bn-BD" };
+    var supportedCultures = new[] { "en", "bn" };
     var localizationOptions = new RequestLocalizationOptions()
                                   .SetDefaultCulture("en-US")
                                   .AddSupportedCultures(supportedCultures)
@@ -152,7 +152,7 @@ try
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{culture=en-US}/{controller=Home}/{action=Index}/{id?}")
+        pattern: "{culture=en}/{controller=Home}/{action=Index}/{id?}")
         .WithStaticAssets();
 
     app.MapRazorPages()
