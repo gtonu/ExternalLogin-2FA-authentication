@@ -14,11 +14,10 @@ jobs:
     if: ${{ github.event.sender.type != 'Bot' }}
     runs-on: ubuntu-latest
 
-    env:
-      OPENAI_KEY: $ {{ secrets.OPENAI_KEY }}
-      GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
-
     name: Calling Pr-agent
     steps:
       - name: Setup Pr-agent
         uses: Codium-ai/pr-agent@e13da4fdda9903c8c7d1c9ba22f671b43f56039b
+        env:
+          OPENAI_KEY: $ {{ secrets.OPENAI_KEY }}
+          GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
