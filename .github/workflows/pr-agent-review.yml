@@ -2,6 +2,7 @@ name: Pr-agent Workflow
 
 on:
   pull-request:
+    branches: [main]
     types: [opened, synchronize, reopened]
 
 permissions:
