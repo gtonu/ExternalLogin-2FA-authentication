@@ -21,4 +21,4 @@ jobs:
         uses: Codium-ai/pr-agent@e13da4fdda9903c8c7d1c9ba22f671b43f56039b
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.Pr-agent-token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
