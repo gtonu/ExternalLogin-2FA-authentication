@@ -1,0 +1,22 @@
+[config]
+model = "gpt-4o-mini"
+temparature = 0.2
+
+[pr_reviewer]
+enable_review_labels_effort = true
+enable_auto_approval = true
+
+[github_app]
+pr_commands = [
+  "/describe --pr_description.publish_description_as_comment=true",
+  "/agentic_review"
+]
+
+handle_push_trigger = true
+push_commands = [
+  "/agentic_review"
+]
+
+[review_agent]
+enabled = true
+publish_output = true

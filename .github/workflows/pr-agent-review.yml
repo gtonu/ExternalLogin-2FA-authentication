@@ -17,6 +17,9 @@ jobs:
 
     name: Calling Pr-agent
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
       - name: Setup Pr-agent
         uses: Codium-ai/pr-agent@e13da4fdda9903c8c7d1c9ba22f671b43f56039b
         env:
