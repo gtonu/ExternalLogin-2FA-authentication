@@ -1,43 +1,7 @@
 [config]
-model = "gpt-4o-mini"
+model = "openai/gpt-4o-mini"
 temperature = 0.2
 max_tokens = 1500
-
-[pr_reviewer]
-enable_review_labels_effort = true
-enable_auto_approval = false
-extra_instructions = """
-Act as a senior .NET backend engineer reviewing this PR who
-
-Maintains:
-- Clean architecture
-- Industry standard C# and ASP.NET Core syntaxes
-
-Reports only:
-- Security issues
-- Data consistency issues
-- Multi-tenant isolation risks
-- Null reference risks
-- Performance regressions
-- Bugs / logical errors
-- Async/await misuse
-- Performance issues (EF Core, DB queries)
-- code smells
-- repetitive dependency bindings
-
-Ignore style, naming, and trivial suggestions.
-
-For each issue:
-- Problem
-- Impact
-- Concrete fix (code if possible)
-
-Output:
-- Inline comments per line when applicable
-- No praise, no repetition, no diagrams, no summaries
-
-If no critical issues: "No critical issues found."
-"""
 
 [github_app]
 pr_commands = [
@@ -52,3 +16,52 @@ push_commands = [
 [review_agent]
 enabled = true
 publish_output = true
+prefer_single_line_comments = true
+enable_review_labels_effort = true
+enable_auto_approval = false
+
+# Targets bugs, leaks, vulnerabilities, and core technical regressions
+issues_user_guidelines = """
+Act as a senior .NET backend engineer reviewing this PR.
+Reports only:
+- Security issues
+- Data consistency issues
+- Multi-tenant isolation risks
+- Null reference risks
+- Performance regressions
+- Bugs / logical errors
+- Async/await misuse
+- Performance issues (EF Core, DB queries)
+
+For each issue provide:
+- Problem
+- Impact
+- Concrete fix (code if possible)
+
+Output format constraints:
+- Inline comments per line when applicable.
+- No praise, no repetition, no diagrams, no summaries.
+- If no critical issues: 'No critical issues found.'
+"""
+
+# Targets architecture, syntax patterns, and structure anti-patterns
+compliance_user_guidelines = """
+Act as a senior .NET backend engineer enforcing repository rules.
+Ensure:
+- Clean architecture layout
+- Industry standard C# and ASP.NET Core syntaxes
+
+Flag:
+- Code smells
+- Repetitive dependency bindings
+
+Ignore style, naming, and trivial suggestions.
+
+Output format constraints:
+- Inline comments per line when applicable.
+- No praise, no repetition, no diagrams, no summaries.
+"""
+
+[pr_description]
+generate_walkthrough = false
+add_images = false
