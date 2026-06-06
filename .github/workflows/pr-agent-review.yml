@@ -3,7 +3,7 @@ name: Pr-agent Workflow
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, ready_for_review]
 
 permissions:
   contents: read
@@ -23,5 +23,5 @@ jobs:
       - name: Setup Pr-agent
         uses: Codium-ai/pr-agent@e13da4fdda9903c8c7d1c9ba22f671b43f56039b
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
