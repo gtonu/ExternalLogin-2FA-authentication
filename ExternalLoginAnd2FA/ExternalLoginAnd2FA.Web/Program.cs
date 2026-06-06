@@ -7,7 +7,6 @@ using ExternalLoginAnd2FA.Infrastructure.Middleware;
 using ExternalLoginAnd2FA.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Reflection;
