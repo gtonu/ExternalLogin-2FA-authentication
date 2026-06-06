@@ -114,13 +114,6 @@ try
 
     var app = builder.Build();
 
-    var supportedCultures = new[] { "en", "bn" };
-    var localizationOptions = new RequestLocalizationOptions()
-                                  .SetDefaultCulture("en-US")
-                                  .AddSupportedCultures(supportedCultures)
-                                  .AddSupportedUICultures(supportedCultures);
-    localizationOptions.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
-
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
@@ -139,7 +132,6 @@ try
 
     app.UseMiddleware<LocalizationMiddleware>();
 
-    app.UseRequestLocalization(localizationOptions);
     app.UseAuthentication();
     app.UseAuthorization();
 
