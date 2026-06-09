@@ -8,5 +8,10 @@ namespace ExternalLoginAnd2FA.Web.Controllers
         {
             return View();
         }
+
+        public IActionResult Chat()
+        {
+            return View();
+        }
     }
 }
