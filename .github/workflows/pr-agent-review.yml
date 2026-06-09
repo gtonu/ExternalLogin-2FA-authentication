@@ -21,7 +21,9 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Setup Pr-agent
-        uses: Codium-ai/pr-agent@e13da4fdda9903c8c7d1c9ba22f671b43f56039b
+        uses: the-pr-agent/pr-agent@main
         env:
-          OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK__KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          
