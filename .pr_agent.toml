@@ -1,6 +1,7 @@
 [config]
 model = "deepseek/deepseek-v4-pro"
 fallback_models = ["deepseek/deepseek-v4-flash","gpt-4o-mini"]
+custom_model_max_tokens = 1048576
 temperature = 0.2
 max_tokens = 1500
 
